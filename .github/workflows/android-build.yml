@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK & AAB
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Release APK
+    name: Build Release APK & AAB
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -49,15 +49,23 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Build Release APK
+      - name: Build Release APK and AAB Bundle
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon --parallel
+        run: ./gradlew assembleRelease bundleRelease --no-daemon --parallel
 
       - name: Upload Release APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: sahaya-latest-release-apk
           path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Release AAB Bundle artifact (Play Store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: sahaya-latest-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 14
 
@@ -70,7 +78,8 @@ jobs:
         run: |
           gh release create latest \
             android/app/build/outputs/apk/release/app-release.apk \
-            --title "Latest Build" \
-            --notes "Automated build from commit ${{ github.sha }}. Updated on: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            android/app/build/outputs/bundle/release/app-release.aab \
+            --title "Latest Build (APK + AAB)" \
+            --notes "Automated build from commit ${{ github.sha }}. Includes APK for direct install and AAB for Google Play Store. Updated on: $(date -u '+%Y-%m-%d %H:%M UTC')"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
