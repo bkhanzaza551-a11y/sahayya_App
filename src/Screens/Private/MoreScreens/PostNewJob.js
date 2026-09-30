@@ -1103,6 +1103,7 @@ const PostNewJob = ({ navigation, route }) => {
                 error={errors.compensationType}
               />
             </View>
+          </View>
         </View>
 
         <View style={styles.card}>
