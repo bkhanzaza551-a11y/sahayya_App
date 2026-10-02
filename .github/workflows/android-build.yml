@@ -35,16 +35,16 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Clear Metro bundler cache
         run: rm -rf $TMPDIR/metro-* $TMPDIR/haste-* || true
 
       - name: Remove hardcoded Java home from gradle.properties
-        run: sed -i '/org.gradle.java.home/d' android/gradle.properties
+        run: sed -i '/org.gradle.java.home/d' android/gradle.properties || true
 
       - name: Reduce Gradle JVM memory for CI
-        run: sed -i 's/-Xmx20048m/-Xmx4096m/' android/gradle.properties
+        run: sed -i 's/-Xmx20048m/-Xmx4096m/' android/gradle.properties || true
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
